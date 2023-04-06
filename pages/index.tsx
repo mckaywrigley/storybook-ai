@@ -7,7 +7,6 @@ import { StoryNodes } from '@/components/StoryNodes';
 import { OpenAIModel, StoryNode } from '@/types';
 import { generateStoryNode } from '@/utils/app';
 import { IconKey } from '@tabler/icons-react';
-import endent from 'endent';
 import Head from 'next/head';
 import { useEffect, useRef, useState } from 'react';
 
@@ -126,6 +125,8 @@ export default function Home() {
       script: '',
     };
 
+    let nodes: StoryNode[] = [];
+
     for (let i = 0; i < storyNodes.length; i++) {
       setLoadingIndex(i);
 
@@ -135,7 +136,16 @@ export default function Home() {
       }
 
       const generatedNode = await handleGenerateNode(storyNodes[i], i, context);
+
+      if (!generatedNode) {
+        alert(`Failed to generate block ${i + 1}.`);
+        setLoading(false);
+        return;
+      }
+
+      nodes.push(generatedNode);
       setLastNode(generatedNode);
+
       context.summary = `${context.summary} ${generatedNode?.summary}`.slice(
         -4000,
       );
@@ -144,36 +154,27 @@ export default function Home() {
       );
     }
 
-    let text = '';
-    text = storyNodes
-      .map((node) => {
-        return endent`
-      Scene Name:
-      ${node.name}
+    downloadScript(nodes);
 
-      Scene Description:
-      ${node.description}
+    setLoading(false);
+  };
 
-      Scene Summary:
-      ${node.summary}
-
-      Scene Script:
-      ${node.script}\n\n\n
-
-      ----------------------------------------------------------------------------------------
-      `;
-      })
-      .join('');
-
+  const downloadScript = (nodes: StoryNode[]) => {
     if (linkRef.current) {
+      let text = '';
+      text = nodes
+        .map(
+          (node) =>
+            `Scene Name:\n${node.name}\n\nScene Description:\n${node.description}\n\nScene Summary:\n${node.summary}\n\nScene Script:\n${node.script}\n\n\n`,
+        )
+        .join('');
+
       const blob = new Blob([text], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       linkRef.current.href = url;
-      linkRef.current.download = 'story.txt';
+      linkRef.current.download = `storyboard-ai-${new Date().toISOString()}.txt`;
       linkRef.current.click();
     }
-
-    setLoading(false);
   };
 
   useEffect(() => {

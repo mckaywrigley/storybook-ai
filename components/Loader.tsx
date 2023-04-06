@@ -14,7 +14,7 @@ export const Loader: FC<Props> = ({ index, total, lastNode }) => {
       <div className="text-center">
         <div className="text-2xl font-bold">Generating your story...</div>
         <div className="mt-2 text-xl">
-          {index} / {total + 1}
+          {index} / {total}
         </div>
       </div>
 
