@@ -1,123 +1,258 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from '@/styles/Home.module.css'
-
-const inter = Inter({ subsets: ['latin'] })
+import { APIKeyInput } from '@/components/APIKeyInput';
+import { AddStoryNodeButton } from '@/components/AddStoryNodeButton';
+import { GenerateStoryButton } from '@/components/GenerateStoryButton';
+import { Loader } from '@/components/Loader';
+import { ResetStoryButton } from '@/components/ResetStoryButton';
+import { StoryNodes } from '@/components/StoryNodes';
+import { OpenAIModel, StoryNode } from '@/types';
+import { generateStoryNode } from '@/utils/app';
+import { IconKey } from '@tabler/icons-react';
+import endent from 'endent';
+import Head from 'next/head';
+import { useEffect, useRef, useState } from 'react';
 
 export default function Home() {
+  const [model, setModel] = useState<OpenAIModel>('gpt-3.5-turbo');
+  const [apiKey, setApiKey] = useState<string>('');
+  const [showApiKeyInput, setShowApiKeyInput] = useState<boolean>(false);
+
+  const [storyNodes, setStoryNodes] = useState<StoryNode[]>([]);
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const [loadingIndex, setLoadingIndex] = useState<number>(0);
+  const [lastNode, setLastNode] = useState<StoryNode>();
+
+  const linkRef = useRef<HTMLAnchorElement>(null);
+
+  const handleApiKeyChange = (value: string) => {
+    setApiKey(value);
+    localStorage.setItem('apiKey', value);
+  };
+
+  const handleAddStoryNode = (index: number) => {
+    setStoryNodes((prevStoryNodes) => {
+      const newStoryNodes = [...prevStoryNodes];
+      newStoryNodes.splice(index === 0 ? 0 : index + 1, 0, {
+        name: '',
+        description: '',
+        summary: '',
+        script: '',
+      });
+      localStorage.setItem('storyNodes', JSON.stringify(newStoryNodes));
+      return newStoryNodes;
+    });
+  };
+
+  const handleUpdateStoryNode = (index: number, storyNode: StoryNode) => {
+    setStoryNodes((prevStoryNodes) => {
+      const newStoryNodes = [...prevStoryNodes];
+      newStoryNodes[index] = storyNode;
+      localStorage.setItem('storyNodes', JSON.stringify(newStoryNodes));
+      return newStoryNodes;
+    });
+  };
+
+  const handleRemoveStoryNode = (index: number) => {
+    setStoryNodes((prevStoryNodes) => {
+      const newStoryNodes = [...prevStoryNodes];
+      newStoryNodes.splice(index, 1);
+
+      if (newStoryNodes.length === 0) {
+        newStoryNodes.push({
+          name: '',
+          description: '',
+          summary: '',
+          script: '',
+        });
+      }
+
+      localStorage.setItem('storyNodes', JSON.stringify(newStoryNodes));
+      return newStoryNodes;
+    });
+  };
+
+  const handleResetStory = () => {
+    const proceed = confirm('Are you sure you want to reset the story?');
+
+    if (!proceed) {
+      return;
+    }
+
+    setStoryNodes([{ name: '', description: '', summary: '', script: '' }]);
+
+    localStorage.removeItem('storyNodes');
+  };
+
+  const handleGenerateNode = async (
+    node: StoryNode,
+    index: number,
+    context: { summary: string; script: string },
+  ) => {
+    const generatedNode = await generateStoryNode(node, context, model, apiKey);
+
+    if (generatedNode) {
+      handleUpdateStoryNode(index, generatedNode);
+    } else {
+      alert(`Failed to generate block ${index + 1}.`);
+    }
+
+    return generatedNode;
+  };
+
+  const handleGenerateStory = async () => {
+    const invalidNodes = storyNodes.filter(
+      (node) => node.name === '' || node.description === '',
+    );
+
+    if (invalidNodes.length > 0) {
+      alert('Please fill in the name and description for every scene.');
+      return;
+    }
+
+    setLoading(true);
+
+    let context = {
+      summary: '',
+      script: '',
+    };
+
+    for (let i = 0; i < storyNodes.length; i++) {
+      setLoadingIndex(i);
+
+      const isLastNode = i === storyNodes.length - 1;
+      if (isLastNode) {
+        context.summary = `${context.summary}\n\nThis is the final scene.`;
+      }
+
+      const generatedNode = await handleGenerateNode(storyNodes[i], i, context);
+      setLastNode(generatedNode);
+      context.summary = `${context.summary} ${generatedNode?.summary}`.slice(
+        -4000,
+      );
+      context.script = `${context.script} ${generatedNode?.script}`.slice(
+        -4000,
+      );
+    }
+
+    let text = '';
+    text = storyNodes
+      .map((node) => {
+        return endent`
+      Scene Name:
+      ${node.name}
+
+      Scene Description:
+      ${node.description}
+
+      Scene Summary:
+      ${node.summary}
+
+      Scene Script:
+      ${node.script}\n\n\n
+
+      ----------------------------------------------------------------------------------------
+      `;
+      })
+      .join('');
+
+    if (linkRef.current) {
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      linkRef.current.href = url;
+      linkRef.current.download = 'story.txt';
+      linkRef.current.click();
+    }
+
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    const apiKey = localStorage.getItem('apiKey');
+    if (apiKey) {
+      setApiKey(apiKey);
+      setShowApiKeyInput(false);
+    } else {
+      setShowApiKeyInput(true);
+    }
+
+    const storyNodes = localStorage.getItem('storyNodes');
+    if (storyNodes) {
+      setStoryNodes(JSON.parse(storyNodes));
+    } else {
+      setStoryNodes([{ name: '', description: '', summary: '', script: '' }]);
+    }
+  }, []);
+
   return (
     <>
       <Head>
-        <title>Create Next App</title>
-        <meta name="description" content="Generated by create next app" />
+        <title>Storyboard AI</title>
+        <meta
+          name="description"
+          content="An AI powered storyboard tool for creatives."
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
-        <div className={styles.description}>
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>pages/index.tsx</code>
-          </p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{' '}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
-          </div>
-        </div>
+      <main className="flex h-full min-h-screen flex-col items-center bg-gradient-to-b from-indigo-500 to-indigo-700 px-2 pb-10 text-neutral-200 sm:px-10">
+        <div className="mt-10 text-4xl">Storyboard AI</div>
 
-        <div className={styles.center}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
-            width={180}
-            height={37}
-            priority
-          />
-          <div className={styles.thirteen}>
-            <Image
-              src="/thirteen.svg"
-              alt="13"
-              width={40}
-              height={31}
-              priority
+        <div className="mt-6">
+          {showApiKeyInput ? (
+            <APIKeyInput
+              apiKey={apiKey}
+              onChange={handleApiKeyChange}
+              onSet={() => setShowApiKeyInput(!showApiKeyInput)}
             />
-          </div>
+          ) : (
+            <div className="absolute right-3 top-3 sm:right-10 sm:top-5">
+              <IconKey
+                className="h-7 w-7 cursor-pointer hover:opacity-50 sm:h-[30px] sm:w-[30px]"
+                onClick={() => setShowApiKeyInput(!showApiKeyInput)}
+              />
+            </div>
+          )}
         </div>
 
-        <div className={styles.grid}>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Docs <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Find in-depth information about Next.js features and&nbsp;API.
-            </p>
-          </a>
+        {!showApiKeyInput &&
+          (loading ? (
+            <div className="mt-4">
+              <Loader
+                index={loadingIndex}
+                total={storyNodes.length}
+                lastNode={lastNode}
+              />
+            </div>
+          ) : (
+            <div className="flex w-[350px] flex-col items-center sm:w-[800px]">
+              <div className="flex w-[320px] justify-between">
+                <ResetStoryButton onResetStory={handleResetStory} />
 
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Learn <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Learn about Next.js in an interactive course with&nbsp;quizzes!
-            </p>
-          </a>
+                <GenerateStoryButton onGenerateStory={handleGenerateStory} />
+              </div>
 
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Templates <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Discover and deploy boilerplate example Next.js&nbsp;projects.
-            </p>
-          </a>
+              <div className="mb-2 mt-5 w-[600px] border-b" />
 
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Deploy <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Instantly deploy your Next.js site to a shareable URL
-              with&nbsp;Vercel.
-            </p>
-          </a>
-        </div>
+              <div className="flex flex-col items-center">
+                <div className="mt-4">
+                  <AddStoryNodeButton
+                    onAddStoryNode={() => handleAddStoryNode(0)}
+                  />
+                </div>
+
+                <div className="mt-4 w-[350px] sm:w-[600px]">
+                  <StoryNodes
+                    storyNodes={storyNodes}
+                    onUpdateStoryNode={handleUpdateStoryNode}
+                    onRemoveStoryNode={handleRemoveStoryNode}
+                    onAddStoryNode={handleAddStoryNode}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        <a ref={linkRef} style={{ display: 'none' }} href="/" download />
       </main>
     </>
-  )
+  );
 }
