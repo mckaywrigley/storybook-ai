@@ -28,7 +28,9 @@ export const StoryNodes: FC<Props> = ({
           />
 
           <div className="my-6 flex justify-center">
-            <AddStoryNodeButton onAddStoryNode={() => onAddStoryNode(index)} />
+            <AddStoryNodeButton
+              onAddStoryNode={() => onAddStoryNode(index + 1)}
+            />
           </div>
 
           <button

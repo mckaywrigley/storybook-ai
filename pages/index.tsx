@@ -32,12 +32,22 @@ export default function Home() {
   const handleAddStoryNode = (index: number) => {
     setStoryNodes((prevStoryNodes) => {
       const newStoryNodes = [...prevStoryNodes];
-      newStoryNodes.splice(index === 0 ? 0 : index + 1, 0, {
-        name: '',
-        description: '',
-        summary: '',
-        script: '',
-      });
+      if (index === 0) {
+        newStoryNodes.unshift({
+          name: '',
+          description: '',
+          summary: '',
+          script: '',
+        });
+      } else {
+        newStoryNodes.splice(index, 0, {
+          name: '',
+          description: '',
+          summary: '',
+          script: '',
+        });
+      }
+
       localStorage.setItem('storyNodes', JSON.stringify(newStoryNodes));
       return newStoryNodes;
     });
