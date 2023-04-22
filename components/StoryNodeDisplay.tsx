@@ -16,11 +16,11 @@ export const StoryNodeDisplay: FC<Props> = ({
     p-4"
     >
       <div className="border-b pb-4">
-        <div className="font-bold">Scene Name</div>
+        <div className="font-bold">Chapter Name</div>
         {onUpdateStoryNode ? (
           <input
             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-black shadow-sm focus:border-indigo-500 focus:outline-none"
-            placeholder="Enter the scene name."
+            placeholder="Enter the chapter name."
             value={storyNode.name}
             onChange={(e) =>
               onUpdateStoryNode({ ...storyNode, name: e.target.value })
@@ -34,12 +34,12 @@ export const StoryNodeDisplay: FC<Props> = ({
       </div>
 
       <div className="mt-4 border-b pb-4">
-        <div className="font-bold">Scene Description</div>
+        <div className="font-bold">Chapter Description</div>
         {onUpdateStoryNode ? (
           <textarea
             className="mt-1 h-[200px] w-full rounded-md border border-gray-300 px-3 py-2 text-black shadow-sm focus:border-indigo-500 focus:outline-none"
             style={{ resize: 'none' }}
-            placeholder="Describe the scene."
+            placeholder="Describe the chapter."
             value={storyNode.description}
             onChange={(e) =>
               onUpdateStoryNode({ ...storyNode, description: e.target.value })
@@ -55,16 +55,16 @@ export const StoryNodeDisplay: FC<Props> = ({
       </div>
 
       <div className="mt-4 border-b pb-4">
-        <div className="font-bold">Scene Summary</div>
+        <div className="font-bold">Chapter Summary</div>
         <div className="mt-1">
           {storyNode.summary ? storyNode.summary : 'No summary available.'}
         </div>
       </div>
 
       <div className="mt-4 pb-4">
-        <div className="font-bold">Scene Screenplay</div>
+        <div className="font-bold">Chapter Text</div>
         <div className="mt-1">
-          {storyNode.script ? storyNode.script : 'No script available.'}
+          {storyNode.text ? storyNode.text : 'No text available.'}
         </div>
       </div>
     </div>

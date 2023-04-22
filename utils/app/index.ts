@@ -4,7 +4,7 @@ import { Configuration, OpenAIApi } from 'openai';
 
 export const generateStoryNode = async (
   storyNode: StoryNode,
-  context: { summary: string; script: string },
+  context: { summary: string; text: string },
   model: OpenAIModel,
   key: string,
 ) => {
@@ -13,63 +13,63 @@ export const generateStoryNode = async (
   });
   const openai = new OpenAIApi(configuration);
 
-  const systemPromptScreenplay = endent`
-  You are a world class artist, writer, director, and creative talent. You are tasked with writing a screenplay given the following information:
+  const systemPromptStory = endent`
+  You are a world class storyteller and writer. You are tasked with writing a story given the following information:
 
-  Previous Scene(s) Summary:
+  Previous Story Summary:
   ${context.summary.trim()}
 
-  Previous Scene(s) Script:
-  ${context.script.trim()}
+  Previous Story Text:
+  ${context.text.trim()}
 
-  New Scene Name:
+  New Chapter Name:
   ${storyNode.name.trim()}
 
-  New Scene Description:
+  New Chapter Description:
   ${storyNode.description.trim()}
 
-  Write a screenplay with a full script for a scene that fits the description and name. Format it nicely and make it look like a real screenplay.
+  Use the given information to write the story. The new chapter must be seamlessly integrated into the old chapter and the previous story text. Be thorough and creative. Put a lot of effort into it. The more effort you put into it, the better it will be. Think of this process as writing a book. You will be told when it is the final chapter.
 
-  Be thorough and creative. Put a lot of effort into it. The more effort you put into it, the better it will be. You will be told when it is the final scene.
-
-  Only respond with the properly formatted screenplay for the scene. Do not respond with any other information.
+  Only respond with the text for the new chapter. Do not respond with any other information including things like chapter name, number, etc.
   `;
 
-  let screenplayRes: any;
+  console.log(systemPromptStory);
+
+  let storyRes: any;
   try {
-    screenplayRes = await retryWithDelay(
+    storyRes = await retryWithDelay(
       () =>
         openai.createChatCompletion({
           model,
           messages: [
             {
               role: 'system',
-              content: systemPromptScreenplay,
+              content: systemPromptStory,
             },
           ],
         }),
       30000,
     );
   } catch (error) {
-    throw new Error('Failed to generate screenplay after two attempts.');
+    throw new Error('Failed to generate story after two attempts.');
   }
 
-  const script = screenplayRes.data.choices[0].message?.content;
+  const text = storyRes.data.choices[0].message?.content;
 
-  if (!script) {
-    throw new Error('No screenplay was generated.');
+  if (!text) {
+    throw new Error('No story was generated.');
   }
 
   let updatedStoryNode: StoryNode = {
     ...storyNode,
-    script,
+    text,
   };
 
   const systemPromptSummary = endent`
-  You are a world expert at summarizing information. Summarize the screenplay you wrote for the given scene in a short paragraph.
+  You are a world expert at summarizing information. Summarize the text you wrote for the given chapter in 2 sentences.
 
-  Screenplay:
-  ${script.trim()}
+  Story:
+  ${text.trim()}
 
   Summary:`;
 

@@ -36,14 +36,14 @@ export default function Home() {
           name: '',
           description: '',
           summary: '',
-          script: '',
+          text: '',
         });
       } else {
         newStoryNodes.splice(index, 0, {
           name: '',
           description: '',
           summary: '',
-          script: '',
+          text: '',
         });
       }
 
@@ -71,7 +71,7 @@ export default function Home() {
           name: '',
           description: '',
           summary: '',
-          script: '',
+          text: '',
         });
       }
 
@@ -87,7 +87,7 @@ export default function Home() {
       return;
     }
 
-    setStoryNodes([{ name: '', description: '', summary: '', script: '' }]);
+    setStoryNodes([{ name: '', description: '', summary: '', text: '' }]);
 
     localStorage.removeItem('storyNodes');
   };
@@ -95,7 +95,7 @@ export default function Home() {
   const handleGenerateNode = async (
     node: StoryNode,
     index: number,
-    context: { summary: string; script: string },
+    context: { summary: string; text: string },
   ) => {
     const generatedNode = await generateStoryNode(node, context, model, apiKey);
 
@@ -114,7 +114,7 @@ export default function Home() {
     );
 
     if (invalidNodes.length > 0) {
-      alert('Please fill in the name and description for every scene.');
+      alert('Please fill in the name and description for every chapter.');
       return;
     }
 
@@ -122,7 +122,7 @@ export default function Home() {
 
     let context = {
       summary: '',
-      script: '',
+      text: '',
     };
 
     let nodes: StoryNode[] = [];
@@ -132,7 +132,7 @@ export default function Home() {
 
       const isLastNode = i === storyNodes.length - 1;
       if (isLastNode) {
-        context.summary = `${context.summary}\n\nThis is the final scene.`;
+        context.summary = `${context.summary}\n\nThis is the final chapter.`;
       }
 
       const generatedNode = await handleGenerateNode(storyNodes[i], i, context);
@@ -149,30 +149,28 @@ export default function Home() {
       context.summary = `${context.summary} ${generatedNode?.summary}`.slice(
         -4000,
       );
-      context.script = `${context.script} ${generatedNode?.script}`.slice(
-        -4000,
-      );
+      context.text = `${context.text} ${generatedNode?.text}`.slice(-4000);
     }
 
-    downloadScript(nodes);
+    downloadStory(nodes);
 
     setLoading(false);
   };
 
-  const downloadScript = (nodes: StoryNode[]) => {
+  const downloadStory = (nodes: StoryNode[]) => {
     if (linkRef.current) {
       let text = '';
       text = nodes
         .map(
           (node) =>
-            `Scene Name:\n${node.name}\n\nScene Description:\n${node.description}\n\nScene Summary:\n${node.summary}\n\nScene Script:\n${node.script}\n\n\n`,
+            `Chapter Name:\n${node.name}\n\nChapter Description:\n${node.description}\n\nChapter Summary:\n${node.summary}\n\nChapter Text:\n${node.text}\n\n\n`,
         )
         .join('');
 
       const blob = new Blob([text], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       linkRef.current.href = url;
-      linkRef.current.download = `storyboard-ai-${new Date().toISOString()}.txt`;
+      linkRef.current.download = `storybook-ai-${new Date().toISOString()}.txt`;
       linkRef.current.click();
     }
   };
@@ -190,23 +188,20 @@ export default function Home() {
     if (storyNodes) {
       setStoryNodes(JSON.parse(storyNodes));
     } else {
-      setStoryNodes([{ name: '', description: '', summary: '', script: '' }]);
+      setStoryNodes([{ name: '', description: '', summary: '', text: '' }]);
     }
   }, []);
 
   return (
     <>
       <Head>
-        <title>Storyboard AI</title>
-        <meta
-          name="description"
-          content="An AI powered storyboard tool for creatives."
-        />
+        <title>Storybook AI</title>
+        <meta name="description" content="Use AI to write complete stories." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex h-full min-h-screen flex-col items-center bg-gradient-to-b from-indigo-500 to-indigo-700 px-2 pb-10 text-neutral-200 sm:px-10">
-        <div className="mt-10 text-4xl">Storyboard AI</div>
+        <div className="mt-10 text-4xl">Storybook AI</div>
 
         <div className="mt-6">
           {showApiKeyInput ? (

@@ -12,7 +12,7 @@ export const AddStoryNodeButton: FC<Props> = ({ onAddStoryNode }) => {
       onClick={() => onAddStoryNode()}
     >
       <IconPlus />
-      <div className="ml-1">Scene</div>
+      <div className="ml-1">Chapter</div>
     </button>
   );
 };

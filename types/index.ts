@@ -20,5 +20,5 @@ export interface StoryNode {
   name: string;
   description: string;
   summary: string;
-  script: string;
+  text: string;
 }
