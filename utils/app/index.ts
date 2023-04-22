@@ -28,7 +28,11 @@ export const generateStoryNode = async (
   New Chapter Description:
   ${storyNode.description.trim()}
 
-  Use the given information to write the story. The new chapter must be seamlessly integrated into the old chapter and the previous story text. Be thorough and creative. Put a lot of effort into it. The more effort you put into it, the better it will be. Think of this process as writing a book. You will be told when it is the final chapter.
+  Use the given information to continue writing the story. The new chapter must be seamlessly integrated into the old chapter and the previous story text.
+  
+  Remember, this chapter is not the final chapter (unless specified), so do not end the story unless you are told it is the final chapter.
+  
+  Be thoughtful and creative. Think of this process as writing a book. Write a story that the reader will enjoy reading.
 
   Only respond with the text for the new chapter. Do not respond with any other information including things like chapter name, number, etc.
   `;
