@@ -4,7 +4,12 @@ import { Configuration, OpenAIApi } from 'openai';
 
 export const generateStoryNode = async (
   storyNode: StoryNode,
-  context: { summary: string; text: string },
+  context: {
+    summary: string;
+    text: string;
+    nextChapterName: string;
+    nextChapterDescription: string;
+  },
   model: OpenAIModel,
   key: string,
 ) => {
@@ -22,19 +27,25 @@ export const generateStoryNode = async (
   Previous Story Text:
   ${context.text.trim()}
 
-  New Chapter Name:
+  Current Chapter Name (you will be writing for this chapter):
   ${storyNode.name.trim()}
 
-  New Chapter Description:
+  Current Chapter Description:
   ${storyNode.description.trim()}
 
-  Use the given information to continue writing the story. The new chapter must be seamlessly integrated into the old chapter and the previous story text.
+  Next Chapter Name (chapter after the current chapter):
+  ${context.nextChapterName.trim()}
+
+  Next Chapter Description:
+  ${context.nextChapterDescription.trim()}
+
+  Use the given information to continue writing the story. Write the text for the current chapter. The new chapter must be seamlessly integrated into the previous story text. Also take the next chapter name and description into account when writing the current chapter.
   
   Remember, this chapter is not the final chapter (unless specified), so do not end the story unless you are told it is the final chapter.
   
   Be thoughtful and creative. Think of this process as writing a book. Write a story that the reader will enjoy reading.
 
-  Only respond with the text for the new chapter. Do not respond with any other information including things like chapter name, number, etc.
+  Only respond with the text body for the new chapter. Do not respond with any other information including things like chapter name, number, etc.
   `;
 
   let storyRes: any;

@@ -95,7 +95,12 @@ export default function Home() {
   const handleGenerateNode = async (
     node: StoryNode,
     index: number,
-    context: { summary: string; text: string },
+    context: {
+      summary: string;
+      text: string;
+      nextChapterName: string;
+      nextChapterDescription: string;
+    },
   ) => {
     const generatedNode = await generateStoryNode(node, context, model, apiKey);
 
@@ -123,6 +128,8 @@ export default function Home() {
     let context = {
       summary: '',
       text: '',
+      nextChapterName: storyNodes[0].name,
+      nextChapterDescription: storyNodes[0].description,
     };
 
     let nodes: StoryNode[] = [];
@@ -134,6 +141,10 @@ export default function Home() {
       if (isLastNode) {
         context.summary = `${context.summary}\n\nThis is the final chapter.`;
       }
+
+      context.nextChapterName = storyNodes[i + 1]?.name || 'No more chapters';
+      context.nextChapterDescription =
+        storyNodes[i + 1]?.description || 'No more chapters';
 
       const generatedNode = await handleGenerateNode(storyNodes[i], i, context);
 
@@ -256,7 +267,7 @@ export default function Home() {
                   onChange={(e) => setModel(e.target.value as OpenAIModel)}
                   value={model}
                 >
-                  <option value="gpt-3.5-turbo">GPT 3.5</option>
+                  <option value="gpt-3.5-turbo">GPT-3.5</option>
                   <option value="gpt-4">GPT-4</option>
                 </select>
               </div>
