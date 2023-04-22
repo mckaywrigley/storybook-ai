@@ -76,7 +76,7 @@ export const generateStoryNode = async (
     summaryRes = await retryWithDelay(
       () =>
         openai.createChatCompletion({
-          model,
+          model: 'gpt-3.5-turbo',
           messages: [
             {
               role: 'system',
@@ -120,68 +120,3 @@ const retryWithDelay = (func: any, delay: number) =>
       }, delay);
     }
   });
-
-// UNUSED: SAVING FOR LATER
-// const handleGenerateStory = async () => {
-//   const maxCodeLength = model === 'gpt-3.5-turbo' ? 6000 : 12000;
-
-//   if (!apiKey) {
-//     alert('Please enter an API key.');
-//     return;
-//   }
-
-//   if (!input) {
-//     alert('Please enter some text.');
-//     return;
-//   }
-
-//   setLoading(true);
-
-//   const controller = new AbortController();
-
-//   const body: APIBody = {
-//     storyNodes,
-//     model,
-//     key: apiKey,
-//   };
-
-//   const response = await fetch('/api/stream', {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//     },
-//     signal: controller.signal,
-//     body: JSON.stringify(body),
-//   });
-
-//   if (!response.ok) {
-//     setLoading(false);
-//     alert('Something went wrong.');
-//     return;
-//   }
-
-//   const data = response.body;
-
-//   if (!data) {
-//     setLoading(false);
-//     alert('Something went wrong.');
-//     return;
-//   }
-
-//   const reader = data.getReader();
-//   const decoder = new TextDecoder();
-//   let done = false;
-//   let code = '';
-
-//   while (!done) {
-//     const { value, done: doneReading } = await reader.read();
-//     done = doneReading;
-//     const chunkValue = decoder.decode(value);
-
-//     code += chunkValue;
-
-//     setOutput((prevOutput) => prevOutput + chunkValue);
-//   }
-
-//   setLoading(false);
-// };
