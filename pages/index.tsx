@@ -159,13 +159,7 @@ export default function Home() {
 
   const downloadStory = (nodes: StoryNode[]) => {
     if (linkRef.current) {
-      let text = '';
-      text = nodes
-        .map(
-          (node) =>
-            `Chapter Name:\n${node.name}\n\nChapter Description:\n${node.description}\n\nChapter Summary:\n${node.summary}\n\nChapter Text:\n${node.text}\n\n\n`,
-        )
-        .join('');
+      let text = nodes.map((node) => `${node.text}\n\n`).join('');
 
       const blob = new Blob([text], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);

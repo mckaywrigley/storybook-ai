@@ -33,8 +33,6 @@ export const generateStoryNode = async (
   Only respond with the text for the new chapter. Do not respond with any other information including things like chapter name, number, etc.
   `;
 
-  console.log(systemPromptStory);
-
   let storyRes: any;
   try {
     storyRes = await retryWithDelay(
