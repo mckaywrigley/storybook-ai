@@ -2,7 +2,7 @@
 
 Use AI to write complete stories.
 
-See a [demo]().
+See a [demo](https://twitter.com/mckaywrigley/status/1649879593128714241?s=46&t=AowqkodyK6B4JccSOxSPew).
 
 ## How It Works
 
