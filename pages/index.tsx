@@ -146,10 +146,17 @@ export default function Home() {
       nodes.push(generatedNode);
       setLastNode(generatedNode);
 
-      context.summary = `${context.summary} ${generatedNode?.summary}`.slice(
-        -4000,
-      );
-      context.text = `${context.text} ${generatedNode?.text}`.slice(-4000);
+      if (model === 'gpt-3.5-turbo') {
+        context.summary = `${context.summary} ${generatedNode?.summary}`.slice(
+          -4000,
+        );
+        context.text = `${context.text} ${generatedNode?.text}`.slice(-4000);
+      } else {
+        context.summary = `${context.summary} ${generatedNode?.summary}`.slice(
+          -8000,
+        );
+        context.text = `${context.text} ${generatedNode?.text}`.slice(-8000);
+      }
     }
 
     downloadStory(nodes);
