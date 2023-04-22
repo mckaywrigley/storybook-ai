@@ -170,6 +170,18 @@ export default function Home() {
   };
 
   useEffect(() => {
+    if (model === 'gpt-4') {
+      const isConfirmed = confirm(
+        'WARNING! GPT-4 is slow and expensive. Are you sure you want to use it?',
+      );
+
+      if (!isConfirmed) {
+        setModel('gpt-3.5-turbo');
+      }
+    }
+  }, [model]);
+
+  useEffect(() => {
     const apiKey = localStorage.getItem('apiKey');
     if (apiKey) {
       setApiKey(apiKey);
@@ -229,6 +241,17 @@ export default function Home() {
                 <ResetStoryButton onResetStory={handleResetStory} />
 
                 <GenerateStoryButton onGenerateStory={handleGenerateStory} />
+              </div>
+
+              <div>
+                <select
+                  className="mt-4 h-10 w-[320px] rounded-md text-indigo-700"
+                  onChange={(e) => setModel(e.target.value as OpenAIModel)}
+                  value={model}
+                >
+                  <option value="gpt-3.5-turbo">GPT 3.5</option>
+                  <option value="gpt-4">GPT-4</option>
+                </select>
               </div>
 
               <div className="mb-2 mt-5 w-[600px] border-b" />
